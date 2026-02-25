@@ -72,8 +72,10 @@ Also add an entry in the "Directory Structure" tree.
 - Confirm service references use `{{ include "app.name" . }}` (name) and `{{ include "app.namespace" . }}` (namespace)
 - Confirm YAML indentation under `customResources: - |` is correct (2-space indent inside the block scalar)
 
-## Key References
+## Required Reading
 
-- **YAML patterns & skeletons:** [.ai/patterns.md](.ai/patterns.md)
-- **Template expressions, conventions & gotchas:** [.ai/reference.md](.ai/reference.md)
-- **App catalog & user-facing docs:** [README.md](README.md)
+Before creating or modifying any example app, you **must** read these files:
+
+1. **Read `.ai/patterns.md` first** — contains the exact YAML skeletons to copy from. Pick the correct pattern (A, B, or C) before writing any YAML.
+2. **Read `.ai/reference.md` second** — contains template expressions, naming conventions, and gotchas that cause broken deployments if ignored (e.g., annotations not being tpl-rendered, service name mismatches).
+3. **Read `README.md`** — contains the app catalog tables you must update when adding a new example.
