@@ -1,0 +1,8 @@
+# PostgreSQL 18 — used to demonstrate TCP routing via Traefik.
+# Data is ephemeral (no persistent volume). All data is lost on pod restart.
+
+image:
+  registry: docker.io
+  repository: postgres
+  tag: "18"
+  port: 5432

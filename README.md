@@ -1,6 +1,6 @@
 # deployment-configurations-examples
 
-Example [deployment-configurations](https://github.com/GlueOps/deployment-configurations) for the GlueOps Platform. This repository contains **18 ready-to-deploy Traefik ingress examples** that demonstrate routing patterns using the [`app` Helm chart](https://github.com/GlueOps/project-template-helm-chart-app).
+Example [deployment-configurations](https://github.com/GlueOps/deployment-configurations) for the GlueOps Platform. This repository contains **19 ready-to-deploy Traefik ingress examples** that demonstrate routing patterns using the [`app` Helm chart](https://github.com/GlueOps/project-template-helm-chart-app).
 
 All examples use **Helm template expressions** instead of hardcoded domains, so they work on **any** GlueOps captain cluster without modification.
 
@@ -70,6 +70,7 @@ These use `customResources` to create Traefik-native `IngressRoute` CRDs with fu
 | [`traefik-basicauth`](apps/traefik-basicauth/) | HTTP Basic Auth middleware with Secret-backed credentials |
 | [`traefik-tls`](apps/traefik-tls/) | HTTPS redirect middleware + TLS version enforcement |
 | [`traefik-tcp`](apps/traefik-tcp/) | `IngressRouteTCP` for raw TCP/TLS passthrough routing |
+| [`traefik-tcp-postgres`](apps/traefik-tcp-postgres/) | `IngressRouteTCP` for PostgreSQL with TLS termination + ALPN |
 
 ### Standard Kubernetes Ingress Examples
 
@@ -125,6 +126,7 @@ deployment-configurations-examples/
     ├── traefik-basicauth/              # Basic auth middleware
     ├── traefik-tls/                    # HTTPS redirect + TLS options
     ├── traefik-tcp/                    # TCP passthrough routing
+    ├── traefik-tcp-postgres/           # TCP + PostgreSQL routing
     ├── traefik-ingress/                # Standard Ingress (basic)
     ├── traefik-ingress-sticky/         # Standard Ingress (sticky sessions)
     ├── traefik-ingress-paths/          # Standard Ingress (path routing)
