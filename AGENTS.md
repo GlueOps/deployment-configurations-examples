@@ -11,7 +11,7 @@ ArgoCD uses a **git directory generator** that scans `apps/*/envs/*/` paths. For
 3. `apps/<app>/base/base-values.yaml` — shared across all envs of one app
 4. `apps/<app>/envs/<env>/values.yaml` — environment-specific config
 
-The platform injects `captain_domain` (e.g., `nonprod.jupiter.onglueops.rocks`) as an inline Helm value, available as `{{ .Values.captain_domain }}`.
+The platform injects `captain_domain` (e.g., `<cluster>.<tenant>.onglueops.<tld>`) as an inline Helm value, available as `{{ .Values.captain_domain }}`.
 
 ## Adding a New Traefik Example — Checklist
 

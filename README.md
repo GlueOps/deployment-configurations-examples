@@ -39,7 +39,7 @@ The GlueOps Platform uses an **ArgoCD ApplicationSet** with a [git directory gen
    - `env-overlays/<env-group>/env-values.yaml` — shared across an environment group
    - `apps/<app>/base/base-values.yaml` — shared across all envs of one app
    - `apps/<app>/envs/<env>/values.yaml` — environment-specific config
-4. Injects `captain_domain` (e.g., `nonprod.jupiter.onglueops.rocks`) as an inline Helm value, making it available as `{{ .Values.captain_domain }}`
+4. Injects `captain_domain` (e.g., `<cluster>.<tenant>.onglueops.<tld>`) as an inline Helm value, making it available as `{{ .Values.captain_domain }}`
 
 ### Template Expressions
 
@@ -47,7 +47,7 @@ These Helm template expressions are available inside `customResources`, `customR
 
 | Expression | Resolves To | Example |
 |-----------|-------------|---------|
-| `{{ .Values.captain_domain }}` | Your cluster's domain | `nonprod.jupiter.onglueops.rocks` |
+| `{{ .Values.captain_domain }}` | Your cluster's domain | `my-cluster.my-tenant.onglueops.com` |
 | `{{ include "app.name" . }}` | ArgoCD app name (`<app-folder>-<env-folder>`) | `traefik-basic-prod` |
 | `{{ include "app.namespace" . }}` | Target namespace | `nonprod` |
 

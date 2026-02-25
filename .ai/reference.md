@@ -6,7 +6,7 @@ These Helm template expressions are available inside `customResources`, `customR
 
 | Expression | Resolves To | Example Value |
 |---|---|---|
-| `{{ .Values.captain_domain }}` | Cluster domain (injected by platform) | `nonprod.jupiter.onglueops.rocks` |
+| `{{ .Values.captain_domain }}` | Cluster domain (injected by platform) | `my-cluster.my-tenant.onglueops.com` |
 | `{{ include "app.name" . }}` | ArgoCD app name = `<app-folder>-<env-folder>` | `traefik-basic-prod` |
 | `{{ include "app.namespace" . }}` | Target namespace | `nonprod` |
 
