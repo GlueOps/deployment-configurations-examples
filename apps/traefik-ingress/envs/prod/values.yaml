@@ -1,0 +1,14 @@
+deployment:
+  enabled: true
+  replicas: 1
+
+service:
+  enabled: true
+
+ingress:
+  enabled: true
+  ingressClassName: public-traefik
+  entries:
+    - name: public
+      hosts:
+        - hostname: '{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}'

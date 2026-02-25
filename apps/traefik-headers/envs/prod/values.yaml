@@ -1,0 +1,54 @@
+deployment:
+  enabled: true
+  replicas: 1
+
+service:
+  enabled: true
+
+customResources:
+  - |
+    apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: traefik-headers-security
+    spec:
+      headers:
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        stsPreload: true
+        customResponseHeaders:
+          X-Custom-Header: "glueops-traefik"
+        accessControlAllowOriginList:
+          - "https://example.com"
+        accessControlAllowMethods:
+          - "GET"
+          - "POST"
+          - "OPTIONS"
+        accessControlAllowHeaders:
+          - "Content-Type"
+          - "Authorization"
+        accessControlMaxAge: 86400
+  - |
+    apiVersion: traefik.io/v1alpha1
+    kind: IngressRoute
+    metadata:
+      name: traefik-headers
+      annotations:
+        kubernetes.io/ingress.class: public-traefik
+        external-dns.alpha.kubernetes.io/target: public-v2.{{ .Values.captain_domain }}
+    spec:
+      entryPoints:
+        - web
+        - websecure
+      routes:
+        - match: Host(`{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}`)
+          kind: Rule
+          middlewares:
+            - name: traefik-headers-security
+          services:
+            - name: {{ include "app.name" . }}
+              namespace: {{ include "app.namespace" . }}
+              port: 80

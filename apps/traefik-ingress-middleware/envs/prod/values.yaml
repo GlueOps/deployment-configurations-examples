@@ -1,0 +1,30 @@
+deployment:
+  enabled: true
+  replicas: 1
+
+service:
+  enabled: true
+
+ingress:
+  enabled: true
+  ingressClassName: public-traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: nonprod-traefik-ingress-mw-headers@kubernetescrd
+  entries:
+    - name: public
+      hosts:
+        - hostname: '{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}'
+
+customResources:
+  - |
+    apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: traefik-ingress-mw-headers
+    spec:
+      headers:
+        customResponseHeaders:
+          X-Custom-Header: "managed-by-traefik"
+        frameDeny: true
+        contentTypeNosniff: true
+        browserXssFilter: true

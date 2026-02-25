@@ -1,0 +1,28 @@
+deployment:
+  enabled: true
+  replicas: 1
+
+service:
+  enabled: true
+
+ingress:
+  enabled: true
+  ingressClassName: public-traefik
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: web,websecure
+    traefik.ingress.kubernetes.io/router.middlewares: nonprod-traefik-ingress-tls-redirect@kubernetescrd
+  entries:
+    - name: public
+      hosts:
+        - hostname: '{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}'
+
+customResources:
+  - |
+    apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: traefik-ingress-tls-redirect
+    spec:
+      redirectScheme:
+        scheme: https
+        permanent: true
