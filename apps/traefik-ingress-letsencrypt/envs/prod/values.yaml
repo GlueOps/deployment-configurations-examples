@@ -1,0 +1,22 @@
+deployment:
+  enabled: true
+  replicas: 1
+
+service:
+  enabled: true
+
+ingress:
+  enabled: true
+  ingressClassName: public-traefik
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-public-traefik
+  entries:
+    - name: public
+      hosts:
+        - hostname: app.example.com
+        - hostname: api.example.com
+  tls:
+    - secretName: traefik-ingress-letsencrypt-cert
+      hosts:
+        - app.example.com
+        - api.example.com

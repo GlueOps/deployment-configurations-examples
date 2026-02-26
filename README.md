@@ -1,6 +1,6 @@
 # deployment-configurations-examples
 
-Example [deployment-configurations](https://github.com/GlueOps/deployment-configurations) for the GlueOps Platform. This repository contains **21 ready-to-deploy Traefik ingress examples** that demonstrate routing patterns using the [`app` Helm chart](https://github.com/GlueOps/project-template-helm-chart-app).
+Example [deployment-configurations](https://github.com/GlueOps/deployment-configurations) for the GlueOps Platform. This repository contains **23 ready-to-deploy Traefik ingress examples** that demonstrate routing patterns using the [`app` Helm chart](https://github.com/GlueOps/project-template-helm-chart-app).
 
 All examples use **Helm template expressions** instead of hardcoded domains, so they work on **any** GlueOps captain cluster without modification.
 
@@ -69,6 +69,7 @@ These use `customResources` to create Traefik-native `IngressRoute` CRDs with fu
 | [`traefik-ratelimit`](apps/traefik-ratelimit/) | Rate limiting middleware (requests/second with burst) |
 | [`traefik-basicauth`](apps/traefik-basicauth/) | HTTP Basic Auth middleware with Secret-backed credentials |
 | [`traefik-tls`](apps/traefik-tls/) | HTTPS redirect middleware + TLS version enforcement |
+| [`traefik-letsencrypt`](apps/traefik-letsencrypt/) | Let's Encrypt HTTP-01 certs with cert-manager + IngressRoute (multi-domain) |
 | [`traefik-tcp`](apps/traefik-tcp/) | `IngressRouteTCP` for raw TCP/TLS passthrough routing |
 | [`traefik-tcp-postgres`](apps/traefik-tcp-postgres/) | `IngressRouteTCP` for PostgreSQL with TLS termination + ALPN |
 | [`traefik-sticky`](apps/traefik-sticky/) | Sticky sessions with cookie-based affinity via IngressRoute |
@@ -85,6 +86,7 @@ These use the Helm chart's built-in `ingress` configuration to create standard `
 | [`traefik-ingress-multi-host`](apps/traefik-ingress-multi-host/) | Multiple hostnames on one Ingress |
 | [`traefik-ingress-middleware`](apps/traefik-ingress-middleware/) | Standard Ingress + Traefik Middleware via annotations ⚠️ |
 | [`traefik-ingress-tls`](apps/traefik-ingress-tls/) | HTTPS redirect via Ingress annotation + Middleware ⚠️ |
+| [`traefik-ingress-letsencrypt`](apps/traefik-ingress-letsencrypt/) | Let's Encrypt HTTP-01 certs with cert-manager annotation (multi-domain) |
 
 ### Cookie-Based Canary Routing
 
@@ -127,6 +129,7 @@ deployment-configurations-examples/
     ├── traefik-ratelimit/              # Rate limiting middleware
     ├── traefik-basicauth/              # Basic auth middleware
     ├── traefik-tls/                    # HTTPS redirect + TLS options
+    ├── traefik-letsencrypt/            # Let's Encrypt HTTP-01 + IngressRoute
     ├── traefik-tcp/                    # TCP passthrough routing
     ├── traefik-tcp-postgres/           # TCP + PostgreSQL routing
     ├── traefik-ingress/                # Standard Ingress (basic)
@@ -135,6 +138,7 @@ deployment-configurations-examples/
     ├── traefik-ingress-multi-host/     # Standard Ingress (multi-host)
     ├── traefik-ingress-middleware/     # Standard Ingress + Middleware ⚠️
     ├── traefik-ingress-tls/            # Standard Ingress + HTTPS redirect ⚠️
+    ├── traefik-ingress-letsencrypt/    # Standard Ingress + Let's Encrypt HTTP-01
     ├── traefik-sticky/                  # IngressRoute (sticky sessions)
     ├── traefik-canary/                 # Canary routing config
     ├── traefik-canary-sticky/          # Canary routing + sticky sessions

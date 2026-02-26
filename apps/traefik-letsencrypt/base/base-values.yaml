@@ -1,0 +1,5 @@
+image:
+  registry: docker.io
+  repository: traefik/whoami
+  tag: latest
+  port: 80
