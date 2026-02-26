@@ -17,12 +17,12 @@ customResources:
           priority: 100
           services:
             - name: traefik-canary-v2-prod
-              namespace: {{ include "app.namespace" . }}
+              namespace: '{{ include "app.namespace" . }}'
               port: 80
         - match: Host(`traefik-canary.apps.{{ .Values.captain_domain }}`)
           kind: Rule
           priority: 10
           services:
             - name: traefik-canary-v1-prod
-              namespace: {{ include "app.namespace" . }}
+              namespace: '{{ include "app.namespace" . }}'
               port: 80

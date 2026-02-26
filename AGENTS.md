@@ -66,10 +66,10 @@ Also add an entry in the "Directory Structure" tree.
 
 ### 6. Verify
 
-- Confirm `deployment.enabled: true` and `service.enabled: true` are set (both default to `false`)
+- Confirm `deployment.enabled: true` and `service.enabled: true` are set (both default to `false`). Exception: routing-only apps (e.g., `traefik-canary`) that only define IngressRoutes pointing at other apps' services don't need these.
 - Confirm IngressRoute has both required annotations (`kubernetes.io/ingress.class` and `external-dns.alpha.kubernetes.io/target`)
 - Confirm hostname follows `{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}` pattern
-- Confirm service references use `{{ include "app.name" . }}` (name) and `{{ include "app.namespace" . }}` (namespace)
+- Confirm service references use `'{{ include "app.name" . }}'` (name) and `'{{ include "app.namespace" . }}'` (namespace)
 - Confirm YAML indentation under `customResources: - |` is correct (2-space indent inside the block scalar)
 
 ## Required Reading

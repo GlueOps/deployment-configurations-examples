@@ -33,6 +33,6 @@ customResources:
           middlewares:
             - name: traefik-ip-allowlist
           services:
-            - name: {{ include "app.name" . }}
-              namespace: {{ include "app.namespace" . }}
+            - name: '{{ include "app.name" . }}'
+              namespace: '{{ include "app.namespace" . }}'
               port: 80

@@ -110,8 +110,8 @@ The Helm chart names the Service `{{ include "app.name" . }}`. Your IngressRoute
 
 ```yaml
 services:
-  - name: {{ include "app.name" . }}    # matches the auto-created Service
-    namespace: {{ include "app.namespace" . }}
+  - name: '{{ include "app.name" . }}'    # matches the auto-created Service
+    namespace: '{{ include "app.namespace" . }}'
     port: 80                             # must match image.port
 ```
 
@@ -137,7 +137,7 @@ When one app routes to another app's Service (e.g., canary routing), the service
 # In traefik-canary's IngressRoute:
 services:
   - name: traefik-canary-v1-prod    # hardcoded: <target-app-folder>-<env>
-    namespace: {{ include "app.namespace" . }}
+    namespace: '{{ include "app.namespace" . }}'
     port: 80
 ```
 

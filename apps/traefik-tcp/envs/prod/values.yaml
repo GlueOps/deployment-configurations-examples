@@ -20,8 +20,8 @@ customResources:
       routes:
         - match: HostSNI(`{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}`)
           services:
-            - name: {{ include "app.name" . }}
-              namespace: {{ include "app.namespace" . }}
+            - name: '{{ include "app.name" . }}'
+              namespace: '{{ include "app.namespace" . }}'
               port: 80
       tls:
         passthrough: true

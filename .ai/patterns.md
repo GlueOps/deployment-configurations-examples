@@ -45,8 +45,8 @@ customResources:
         - match: Host(`{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}`)
           kind: Rule
           services:
-            - name: {{ include "app.name" . }}
-              namespace: {{ include "app.namespace" . }}
+            - name: '{{ include "app.name" . }}'
+              namespace: '{{ include "app.namespace" . }}'
               port: 80
 ```
 
@@ -89,8 +89,8 @@ customResources:
           middlewares:
             - name: <middleware-name>
           services:
-            - name: {{ include "app.name" . }}
-              namespace: {{ include "app.namespace" . }}
+            - name: '{{ include "app.name" . }}'
+              namespace: '{{ include "app.namespace" . }}'
               port: 80
 ```
 
@@ -210,7 +210,7 @@ Optionally add env variables to distinguish the service:
 deployment:
   enabled: true
   replicas: 1
-  env:
+  envVariables:
     - name: WHOAMI_NAME
       value: "<identifier>"
 

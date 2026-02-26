@@ -17,7 +17,7 @@ customResources:
           priority: 100
           services:
             - name: traefik-canary-v2-prod
-              namespace: {{ include "app.namespace" . }}
+              namespace: '{{ include "app.namespace" . }}'
               port: 80
               sticky:
                 cookie:
@@ -31,7 +31,7 @@ customResources:
           priority: 10
           services:
             - name: traefik-canary-v1-prod
-              namespace: {{ include "app.namespace" . }}
+              namespace: '{{ include "app.namespace" . }}'
               port: 80
               sticky:
                 cookie:

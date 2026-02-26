@@ -39,8 +39,8 @@ customResources:
           middlewares:
             - name: traefik-tls-redirect
           services:
-            - name: {{ include "app.name" . }}
-              namespace: {{ include "app.namespace" . }}
+            - name: '{{ include "app.name" . }}'
+              namespace: '{{ include "app.namespace" . }}'
               port: 80
   - |
     apiVersion: traefik.io/v1alpha1
@@ -57,8 +57,8 @@ customResources:
         - match: Host(`{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}`)
           kind: Rule
           services:
-            - name: {{ include "app.name" . }}
-              namespace: {{ include "app.namespace" . }}
+            - name: '{{ include "app.name" . }}'
+              namespace: '{{ include "app.namespace" . }}'
               port: 80
       tls:
         options:
