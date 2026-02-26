@@ -1,6 +1,6 @@
 # deployment-configurations-examples
 
-Example [deployment-configurations](https://github.com/GlueOps/deployment-configurations) for the GlueOps Platform. This repository contains **19 ready-to-deploy Traefik ingress examples** that demonstrate routing patterns using the [`app` Helm chart](https://github.com/GlueOps/project-template-helm-chart-app).
+Example [deployment-configurations](https://github.com/GlueOps/deployment-configurations) for the GlueOps Platform. This repository contains **21 ready-to-deploy Traefik ingress examples** that demonstrate routing patterns using the [`app` Helm chart](https://github.com/GlueOps/project-template-helm-chart-app).
 
 All examples use **Helm template expressions** instead of hardcoded domains, so they work on **any** GlueOps captain cluster without modification.
 
@@ -71,6 +71,7 @@ These use `customResources` to create Traefik-native `IngressRoute` CRDs with fu
 | [`traefik-tls`](apps/traefik-tls/) | HTTPS redirect middleware + TLS version enforcement |
 | [`traefik-tcp`](apps/traefik-tcp/) | `IngressRouteTCP` for raw TCP/TLS passthrough routing |
 | [`traefik-tcp-postgres`](apps/traefik-tcp-postgres/) | `IngressRouteTCP` for PostgreSQL with TLS termination + ALPN |
+| [`traefik-sticky`](apps/traefik-sticky/) | Sticky sessions with cookie-based affinity via IngressRoute |
 
 ### Standard Kubernetes Ingress Examples
 
@@ -94,6 +95,7 @@ These three apps work together to demonstrate canary deployments:
 | [`traefik-canary-v1`](apps/traefik-canary-v1/) | Stable version — Deployment + Service (no ingress) |
 | [`traefik-canary-v2`](apps/traefik-canary-v2/) | Canary version — Deployment + Service (no ingress) |
 | [`traefik-canary`](apps/traefik-canary/) | Routing config — IngressRoute with cookie-based split |
+| [`traefik-canary-sticky`](apps/traefik-canary-sticky/) | Canary routing + sticky sessions — reuses v1/v2 backends |
 
 Default traffic goes to v1. Set cookie `canary=v2` to route to v2.
 
@@ -133,7 +135,9 @@ deployment-configurations-examples/
     ├── traefik-ingress-multi-host/     # Standard Ingress (multi-host)
     ├── traefik-ingress-middleware/     # Standard Ingress + Middleware ⚠️
     ├── traefik-ingress-tls/            # Standard Ingress + HTTPS redirect ⚠️
+    ├── traefik-sticky/                  # IngressRoute (sticky sessions)
     ├── traefik-canary/                 # Canary routing config
+    ├── traefik-canary-sticky/          # Canary routing + sticky sessions
     ├── traefik-canary-v1/              # Canary stable version
     └── traefik-canary-v2/              # Canary new version
 ```
