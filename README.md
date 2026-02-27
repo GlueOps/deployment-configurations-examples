@@ -70,7 +70,7 @@ These use `customResources` to create Traefik-native `IngressRoute` CRDs with fu
 | [`traefik-basicauth`](apps/traefik-basicauth/) | HTTP Basic Auth middleware with Secret-backed credentials |
 | [`traefik-tls`](apps/traefik-tls/) | HTTPS redirect middleware + TLS version enforcement |
 | [`traefik-letsencrypt`](apps/traefik-letsencrypt/) | Let's Encrypt HTTP-01 certs with cert-manager + IngressRoute (multi-domain) |
-| [`traefik-tcp`](apps/traefik-tcp/) | `IngressRouteTCP` for raw TCP/TLS passthrough routing |
+| [`traefik-tcp`](apps/traefik-tcp/) | `IngressRouteTCP` for raw TCP routing with TLS termination + ALPN |
 | [`traefik-tcp-postgres`](apps/traefik-tcp-postgres/) | `IngressRouteTCP` for PostgreSQL with TLS termination + ALPN |
 | [`traefik-sticky`](apps/traefik-sticky/) | Sticky sessions with cookie-based affinity via IngressRoute |
 
@@ -130,7 +130,7 @@ deployment-configurations-examples/
     ├── traefik-basicauth/              # Basic auth middleware
     ├── traefik-tls/                    # HTTPS redirect + TLS options
     ├── traefik-letsencrypt/            # Let's Encrypt HTTP-01 + IngressRoute
-    ├── traefik-tcp/                    # TCP passthrough routing
+    ├── traefik-tcp/                    # TCP routing with TLS termination
     ├── traefik-tcp-postgres/           # TCP + PostgreSQL routing
     ├── traefik-ingress/                # Standard Ingress (basic)
     ├── traefik-ingress-sticky/         # Standard Ingress (sticky sessions)
