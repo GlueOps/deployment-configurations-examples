@@ -36,7 +36,7 @@ apps/<app-name>/
 
 ### 3. Write `base/base-values.yaml`
 
-All Traefik examples use the same base image:
+All Traefik examples use the same base image (exception: helper apps such as `traefik-cloudfront-verifier`, which runs nginx-unprivileged on port 8080):
 
 ```yaml
 image:

@@ -1,6 +1,6 @@
 # deployment-configurations-examples
 
-Example [deployment-configurations](https://github.com/GlueOps/deployment-configurations) for the GlueOps Platform. This repository contains **23 ready-to-deploy Traefik ingress examples** that demonstrate routing patterns using the [`app` Helm chart](https://github.com/GlueOps/project-template-helm-chart-app).
+Example [deployment-configurations](https://github.com/GlueOps/deployment-configurations) for the GlueOps Platform. This repository contains **26 ready-to-deploy Traefik ingress examples** that demonstrate routing patterns using the [`app` Helm chart](https://github.com/GlueOps/project-template-helm-chart-app).
 
 All examples use **Helm template expressions** instead of hardcoded domains, so they work on **any** GlueOps captain cluster without modification.
 
@@ -101,6 +101,16 @@ These three apps work together to demonstrate canary deployments:
 
 Default traffic goes to v1. Set cookie `canary=v2` to route to v2.
 
+### CloudFront Origin Protection
+
+These three apps let only your own CloudFront distribution reach an app. CloudFront adds a secret `X-Origin-Verify` header; Traefik checks it with forwardAuth and returns 403 without it. Deploy the verifier first, after writing the secret to `secret/traefik-cloudfront-verifier/<env>` (key `ORIGIN_VERIFY_SECRET`).
+
+| App | Description |
+|-----|-------------|
+| [`traefik-cloudfront-verifier`](apps/traefik-cloudfront-verifier/) | nginx verifier + the shared `traefik-cloudfront-origin-guard` Middleware chain (no ingress) |
+| [`traefik-cloudfront`](apps/traefik-cloudfront/) | App protected through an IngressRoute |
+| [`traefik-ingress-cloudfront`](apps/traefik-ingress-cloudfront/) | App protected through a standard Ingress annotation ⚠️ |
+
 ---
 
 ## Directory Structure
@@ -143,14 +153,17 @@ deployment-configurations-examples/
     ├── traefik-canary/                 # Canary routing config
     ├── traefik-canary-sticky/          # Canary routing + sticky sessions
     ├── traefik-canary-v1/              # Canary stable version
-    └── traefik-canary-v2/              # Canary new version
+    ├── traefik-canary-v2/              # Canary new version
+    ├── traefik-cloudfront-verifier/    # CloudFront origin verifier + Middlewares
+    ├── traefik-cloudfront/             # IngressRoute behind the CloudFront guard
+    └── traefik-ingress-cloudfront/     # Standard Ingress behind the CloudFront guard ⚠️
 ```
 
 ---
 
 ## ⚠️ Important: Standard Ingress Middleware Annotation Limitation
 
-Two apps — `traefik-ingress-middleware` and `traefik-ingress-tls` — reference Traefik Middleware resources from standard Ingress annotations:
+Three apps — `traefik-ingress-middleware`, `traefik-ingress-tls` and `traefik-ingress-cloudfront` — reference Traefik Middleware resources from standard Ingress annotations:
 
 ```yaml
 ingress:
