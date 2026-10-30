@@ -42,7 +42,7 @@ deployment:
       cpu: 10m
       memory: 16Mi
     limits:
-      memory: 64Mi
+      memory: 1Gi
   readinessProbe:
     httpGet:
       path: /healthz
@@ -65,6 +65,9 @@ deployment:
     - name: nginx
       mountPath: /docker-entrypoint.d/05-origin-verify.sh
       subPath: 05-origin-verify.sh
+    - name: nginx
+      mountPath: /etc/nginx/nginx.conf
+      subPath: nginx.conf
     - name: confd
       mountPath: /etc/nginx/conf.d
     - name: tmp
@@ -91,6 +94,21 @@ configMap:
   configs:
     nginx:
       data: |-
+        # The image's default "worker_processes auto" starts one worker per node CPU, whatever the pod's limits.
+        nginx.conf: |
+          worker_processes 4;
+          error_log /var/log/nginx/error.log notice;
+          pid /tmp/nginx.pid;
+          events { worker_connections 1024; }
+          http {
+            client_body_temp_path /tmp/client_temp;
+            proxy_temp_path /tmp/proxy_temp;
+            fastcgi_temp_path /tmp/fastcgi_temp;
+            uwsgi_temp_path /tmp/uwsgi_temp;
+            scgi_temp_path /tmp/scgi_temp;
+            keepalive_timeout 65;
+            include /etc/nginx/conf.d/*.conf;
+          }
         05-origin-verify.sh: |
           #!/bin/sh
           set -eu
