@@ -9,7 +9,8 @@ deployment:
     preStop:
       sleep:
         seconds: 10
-  # Prefer different zones and nodes, so losing one node doesn't take down both verifiers.
+  # Never put both verifiers on one node, and prefer different zones. The node rule must be hard:
+  # a soft rule is ignored on clusters whose nodes have no zone label.
   topologySpreadConstraints:
     - topologyKey: topology.kubernetes.io/zone
       maxSkew: 1
@@ -20,7 +21,8 @@ deployment:
       matchLabelKeys: [pod-template-hash]
     - topologyKey: kubernetes.io/hostname
       maxSkew: 1
-      whenUnsatisfiable: ScheduleAnyway
+      whenUnsatisfiable: DoNotSchedule
+      nodeTaintsPolicy: Honor
       labelSelector:
         matchLabels:
           app.kubernetes.io/instance: '{{ include "app.name" . }}'
