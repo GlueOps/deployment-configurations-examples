@@ -103,7 +103,7 @@ Default traffic goes to v1. Set cookie `canary=v2` to route to v2.
 
 ### CloudFront Origin Protection
 
-These three apps let only your own CloudFront distribution reach an app. CloudFront adds a secret `X-Origin-Verify` header; Traefik checks it with forwardAuth and returns 403 without it. Deploy the verifier first, after writing the secret to `secret/traefik-cloudfront-verifier/<env>` (key `ORIGIN_VERIFY_SECRET`).
+These three apps let only your own CloudFront distribution reach an app. CloudFront adds a secret `X-Origin-Verify` header; Traefik checks it with forwardAuth and returns 403 without it. Deploy the verifier first, after writing the secret to `secret/traefik-cloudfront-verifier/<env>` (key `ORIGIN_VERIFY_SECRETS`, a JSON array such as `["<value>"]`).
 
 | App | Description |
 |-----|-------------|
