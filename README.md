@@ -111,6 +111,8 @@ These three apps let only your own CloudFront distribution reach an app. CloudFr
 | [`traefik-cloudfront`](apps/traefik-cloudfront/) | App protected through an IngressRoute |
 | [`traefik-ingress-cloudfront`](apps/traefik-ingress-cloudfront/) | App protected through a standard Ingress annotation ⚠️ |
 
+To protect your own app, copy the verifier unchanged (except `prod` in its secret path if your environment folder differs) and add the guard to your app's routes: `middlewares: [{name: traefik-cloudfront-origin-guard}]` on an IngressRoute route, or the `<namespace>-traefik-cloudfront-origin-guard@kubernetescrd` annotation on an Ingress. The app must be in the same namespace as the verifier.
+
 ---
 
 ## Directory Structure

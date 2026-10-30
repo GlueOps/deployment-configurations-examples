@@ -9,6 +9,22 @@ deployment:
     preStop:
       sleep:
         seconds: 10
+  # Prefer different zones and nodes, so losing one node doesn't take down both verifiers.
+  topologySpreadConstraints:
+    - topologyKey: topology.kubernetes.io/zone
+      maxSkew: 1
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/instance: '{{ include "app.name" . }}'
+      matchLabelKeys: [pod-template-hash]
+    - topologyKey: kubernetes.io/hostname
+      maxSkew: 1
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/instance: '{{ include "app.name" . }}'
+      matchLabelKeys: [pod-template-hash]
   securityContext:
     runAsNonRoot: true
     runAsUser: 101
@@ -59,10 +75,8 @@ podDisruptionBudget:
   enabled: true
   minAvailable: 1
 
-# Accepted header values, as a JSON array of letters-and-digits strings. Write it to the secret store first, e.g.:
-#   vault kv put secret/traefik-cloudfront-verifier/prod 'ORIGIN_VERIFY_SECRETS=["<openssl rand -hex 32>"]'
-# List two values during a rotation. Values are read at startup: after changing them, run
-#   kubectl rollout restart deployment/traefik-cloudfront-verifier-prod
+# Store ORIGIN_VERIFY_SECRETS at this path first: a JSON array of letters-and-digits strings, e.g. ["<value>"].
+# Change "prod" to your envs/ folder name. Values are read at startup, so restart the Deployment after changing them.
 externalSecret:
   enabled: true
   secrets:
@@ -79,7 +93,8 @@ configMap:
           #!/bin/sh
           set -eu
           # Line breaks are dropped so a pretty-printed array still matches as one line.
-          list=$(printf %s "${ORIGIN_VERIFY_SECRETS:-}" | tr -d '\r\n')
+          [ -n "${ORIGIN_VERIFY_SECRETS:-}" ] || { echo 'ORIGIN_VERIFY_SECRETS is not set: check the key name in your secret store' >&2; exit 1; }
+          list=$(printf %s "$ORIGIN_VERIFY_SECRETS" | tr -d '\r\n')
           printf %s "$list" | grep -Eqx '[[:space:]]*\[[[:space:]]*"[A-Za-z0-9]+"[[:space:]]*(,[[:space:]]*"[A-Za-z0-9]+"[[:space:]]*)*\][[:space:]]*' || {
             echo 'ORIGIN_VERIFY_SECRETS must be a JSON array of letters-and-digits strings, e.g. ["abc123"]' >&2
             exit 1
