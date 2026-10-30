@@ -9,8 +9,7 @@ deployment:
     preStop:
       sleep:
         seconds: 10
-  # Never put both verifiers on one node, and prefer different zones. The node rule must be hard:
-  # a soft rule is ignored on clusters whose nodes have no zone label.
+  # Prefer different zones and nodes, but still schedule both pods on a single node.
   topologySpreadConstraints:
     - topologyKey: topology.kubernetes.io/zone
       maxSkew: 1
@@ -19,14 +18,16 @@ deployment:
         matchLabels:
           app.kubernetes.io/instance: '{{ include "app.name" . }}'
       matchLabelKeys: [pod-template-hash]
-    - topologyKey: kubernetes.io/hostname
-      maxSkew: 1
-      whenUnsatisfiable: DoNotSchedule
-      nodeTaintsPolicy: Honor
-      labelSelector:
-        matchLabels:
-          app.kubernetes.io/instance: '{{ include "app.name" . }}'
-      matchLabelKeys: [pod-template-hash]
+  # Node preference as anti-affinity: a soft hostname spread rule is ignored when nodes have no zone label.
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: '{{ include "app.name" . }}'
   securityContext:
     runAsNonRoot: true
     runAsUser: 101
