@@ -43,7 +43,7 @@ The GlueOps Platform uses an **ArgoCD ApplicationSet** with a [git directory gen
 
 ### Template Expressions
 
-These Helm template expressions are available inside `customResources`, `customResourcesMap`, and `ingress.entries[].hosts[].hostname` values (the chart processes them through [`tpl`](https://helm.sh/docs/howto/charts_tips_and_tricks/#using-the-tpl-function)):
+These Helm template expressions are available inside `customResources`, `customResourcesMap`, `ingress.entries[].hosts[].hostname`, `deployment.volumes`, and `configMap.configs.*.data` values (the chart processes them through [`tpl`](https://helm.sh/docs/howto/charts_tips_and_tricks/#using-the-tpl-function)):
 
 | Expression | Resolves To | Example |
 |-----------|-------------|---------|

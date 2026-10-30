@@ -61,12 +61,14 @@ Add the new app to the appropriate catalog table in `README.md`:
 - IngressRoute examples → "Traefik IngressRoute (CRD) Examples" table
 - Standard Ingress examples → "Standard Kubernetes Ingress Examples" table
 - Canary examples → "Cookie-Based Canary Routing" table
+- CloudFront origin-protection examples → "CloudFront Origin Protection" table
 
 Also add an entry in the "Directory Structure" tree.
 
 ### 6. Verify
 
 - Confirm `deployment.enabled: true` and `service.enabled: true` are set (both default to `false`). Exception: routing-only apps (e.g., `traefik-canary`) that only define IngressRoutes pointing at other apps' services don't need these.
+- Helper apps with no IngressRoute of their own (e.g., `traefik-cloudfront-verifier`, which only defines Middlewares and a forwardAuth backend) skip the annotation, hostname, and service-reference checks below.
 - Confirm IngressRoute has both required annotations (`kubernetes.io/ingress.class` and `external-dns.alpha.kubernetes.io/target`)
 - Confirm hostname follows `{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}` pattern. Exception: routing-only apps that route to other apps' services (e.g., `traefik-canary`) may hardcode the hostname and cross-app service names, since `{{ include "app.name" . }}` resolves to the current app's name, not the target app.
 - Confirm service references use `'{{ include "app.name" . }}'` (name) and `'{{ include "app.namespace" . }}'` (namespace). Exception: cross-app references (e.g., canary routing to `traefik-canary-v1-prod`) must be hardcoded.
