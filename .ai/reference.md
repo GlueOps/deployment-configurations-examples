@@ -18,6 +18,8 @@ These Helm template expressions are available inside `customResources`, `customR
 | `customResourcesMap` entries | ✅ Yes | Same as above |
 | `ingress.entries[].hosts[].hostname` | ✅ Yes | `'{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}'` |
 | `ingress.annotations` values | ❌ No | Must hardcode namespace prefix |
+| `deployment.volumes` / `volumeMounts` | ✅ Yes | `name: '{{ include "app.name" . }}-nginx'` (see `traefik-cloudfront-verifier`) |
+| `configMap.configs.*.data` | ✅ Yes | Any `{{` in a config file is evaluated — nginx/envsubst `$var` and `${VAR}` are safe |
 | All other Helm values | ❌ No | Standard YAML values only |
 
 ---
@@ -117,7 +119,7 @@ services:
 
 ### 4. Service port must match image.port
 
-The Service listens on `image.port` (or `service.port` if explicitly set). The IngressRoute `services[].port` must match this value. All current examples use port `80`.
+The Service listens on `image.port` (or `service.port` if explicitly set). The IngressRoute `services[].port` must match this value. All whoami examples use port `80`; `traefik-cloudfront-verifier` (nginx-unprivileged) uses `8080`.
 
 ### 5. Middleware namespace reference format
 

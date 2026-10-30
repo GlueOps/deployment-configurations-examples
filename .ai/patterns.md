@@ -181,7 +181,7 @@ customResources:
 
 ## Pattern C: Service-Only (No Routing)
 
-**Use for:** Backing services that are routed to by another app's IngressRoute (e.g., canary v1/v2 backends).
+**Use for:** Backing services that are routed to by another app's IngressRoute (e.g., canary v1/v2 backends), or called by a Middleware such as forwardAuth (e.g., `traefik-cloudfront-verifier`).
 
 ### `base/base-values.yaml`
 
