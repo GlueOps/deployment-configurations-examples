@@ -1,6 +1,9 @@
 deployment:
   enabled: true
   replicas: 2
+  # Start each new pod before stopping an old one, so a bad value stalls the rollout instead of halving capacity.
+  # A plain 0 is ignored by the chart.
+  maxUnavailable: "0%"
   securityContext:
     runAsNonRoot: true
     runAsUser: 101
@@ -69,28 +72,29 @@ configMap:
       data: |-
         05-origin-verify.sh: |
           #!/bin/sh
-          # Writes the nginx config at startup with one exact, case-sensitive match per accepted value.
           set -eu
+          # Line breaks are dropped so a pretty-printed array still matches as one line.
           list=$(printf %s "${ORIGIN_VERIFY_SECRETS:-}" | tr -d '\r\n')
           printf %s "$list" | grep -Eqx '[[:space:]]*\[[[:space:]]*"[A-Za-z0-9]+"[[:space:]]*(,[[:space:]]*"[A-Za-z0-9]+"[[:space:]]*)*\][[:space:]]*' || {
             echo 'ORIGIN_VERIFY_SECRETS must be a JSON array of letters-and-digits strings, e.g. ["abc123"]' >&2
             exit 1
           }
-          {
-            echo 'server {'
-            echo '  listen 8080;'
-            echo '  server_tokens off;'
-            echo '  access_log off;'
-            echo '  default_type text/plain;'
-            echo '  location = /healthz { return 200 "ok\n"; }'
-            echo '  location / {'
-            printf '%s\n' "$list" | grep -Eo '"[A-Za-z0-9]+"' | tr -d '"' | while read -r v; do
-              echo "    if (\$http_x_origin_verify = \"$v\") { return 200; }"
-            done
-            echo '    return 403 "Forbidden\n";'
-            echo '  }'
-            echo '}'
-          } > /etc/nginx/conf.d/default.conf
+          rules=$(printf '%s\n' "$list" | grep -Eo '"[A-Za-z0-9]+"' | while read -r v; do
+            echo "    if (\$http_x_origin_verify = $v) { return 200; }"
+          done)
+          cat > /etc/nginx/conf.d/default.conf <<EOF
+          server {
+            listen 8080;
+            server_tokens off;
+            access_log off;
+            default_type text/plain;
+            location = /healthz { return 200 "ok\\n"; }
+            location / {
+          $rules
+              return 403 "Forbidden\\n";
+            }
+          }
+          EOF
 
 customResources:
   - |
