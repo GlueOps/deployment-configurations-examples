@@ -7,8 +7,8 @@ deployment:
   # nginx stops accepting connections as soon as it's told to stop; keep serving until the pod is out of every endpoint list.
   lifecycle:
     preStop:
-      exec:
-        command: ["sleep", "5"]
+      sleep:
+        seconds: 10
   securityContext:
     runAsNonRoot: true
     runAsUser: 101
