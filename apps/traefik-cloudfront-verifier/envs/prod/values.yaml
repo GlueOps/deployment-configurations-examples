@@ -33,6 +33,7 @@ deployment:
     - name: nginx
       configMap:
         name: '{{ include "app.name" . }}-nginx'
+        # Required: the entrypoint skips a non-executable guard, leaving guessable ${...} placeholders.
         defaultMode: 0755
     - name: confd
       emptyDir: {}
