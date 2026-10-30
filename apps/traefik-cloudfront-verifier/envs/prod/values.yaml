@@ -2,6 +2,7 @@ deployment:
   enabled: true
   replicas: 2
   envVariables:
+    # Without this, envsubst would also replace nginx's own $variables if an env var shares the name.
     - name: NGINX_ENVSUBST_FILTER
       value: "^ORIGIN_VERIFY_"
   securityContext:
@@ -29,25 +30,19 @@ deployment:
       path: /healthz
       port: http
   volumes:
-    - name: templates
-      configMap:
-        name: '{{ include "app.name" . }}-nginx'
-    - name: require-secret
+    - name: nginx
       configMap:
         name: '{{ include "app.name" . }}-nginx'
         defaultMode: 0755
-        items:
-          - key: 05-require-origin-verify-secret.sh
-            path: 05-require-origin-verify-secret.sh
     - name: confd
       emptyDir: {}
     - name: tmp
       emptyDir: {}
   volumeMounts:
-    - name: templates
+    - name: nginx
       mountPath: /etc/nginx/templates
       readOnly: true
-    - name: require-secret
+    - name: nginx
       mountPath: /docker-entrypoint.d/05-require-origin-verify-secret.sh
       subPath: 05-require-origin-verify-secret.sh
     - name: confd
@@ -65,6 +60,8 @@ podDisruptionBudget:
 # Expected header value. Write it to the secret store first, e.g.:
 #   vault kv put secret/traefik-cloudfront-verifier/prod ORIGIN_VERIFY_SECRET=<openssl rand -hex 32>
 # Every key at this path becomes an env var in the verifier container.
+# The value is read at startup: after changing it (or the nginx config below), run
+#   kubectl rollout restart deployment/traefik-cloudfront-verifier-prod
 externalSecret:
   enabled: true
   secrets:
@@ -77,19 +74,13 @@ configMap:
   configs:
     nginx:
       data: |-
-        # An unset value would leave the literal "${ORIGIN_VERIFY_SECRET}" in the map as a guessable key.
+        # An unset value would leave the literal "${ORIGIN_VERIFY_SECRET}" in the config as a guessable value.
         05-require-origin-verify-secret.sh: |
           #!/bin/sh
           case "$ORIGIN_VERIFY_SECRET" in
             "" | *[!A-Za-z0-9]*) echo "ORIGIN_VERIFY_SECRET must be set and alphanumeric" >&2; exit 1 ;;
           esac
         default.conf.template: |
-          # The default 64-byte bucket rejects a 64-char key (openssl rand -hex 32).
-          map_hash_bucket_size 128;
-          map $http_x_origin_verify $origin_verified {
-            default 0;
-            "${ORIGIN_VERIFY_SECRET}" 1;
-          }
           server {
             listen 8080;
             server_tokens off;
@@ -97,7 +88,7 @@ configMap:
             default_type text/plain;
             location = /healthz { return 200 "ok\n"; }
             location / {
-              if ($origin_verified) { return 200; }
+              if ($http_x_origin_verify = "${ORIGIN_VERIFY_SECRET}") { return 200; }
               return 403 "Forbidden\n";
             }
           }
@@ -107,7 +98,7 @@ customResources:
     apiVersion: traefik.io/v1alpha1
     kind: Middleware
     metadata:
-      name: cloudfront-origin-verify
+      name: traefik-cloudfront-origin-verify
     spec:
       forwardAuth:
         address: 'http://{{ include "app.name" . }}.{{ include "app.namespace" . }}.svc.cluster.local:8080/'
@@ -117,7 +108,7 @@ customResources:
     apiVersion: traefik.io/v1alpha1
     kind: Middleware
     metadata:
-      name: cloudfront-strip-header
+      name: traefik-cloudfront-strip-header
     spec:
       headers:
         customRequestHeaders:
@@ -126,9 +117,9 @@ customResources:
     apiVersion: traefik.io/v1alpha1
     kind: Middleware
     metadata:
-      name: cloudfront-origin-guard
+      name: traefik-cloudfront-origin-guard
     spec:
       chain:
         middlewares:
-          - name: cloudfront-origin-verify
-          - name: cloudfront-strip-header
+          - name: traefik-cloudfront-origin-verify
+          - name: traefik-cloudfront-strip-header

@@ -5,7 +5,7 @@ deployment:
 service:
   enabled: true
 
-# Requires the traefik-cloudfront-verifier app, which defines the cloudfront-origin-guard Middleware.
+# Requires the traefik-cloudfront-verifier app, which defines the traefik-cloudfront-origin-guard Middleware.
 # Point your CloudFront origin at this hostname and add the X-Origin-Verify custom origin header.
 customResources:
   - |
@@ -24,7 +24,7 @@ customResources:
         - match: Host(`{{ include "app.name" . }}.apps.{{ .Values.captain_domain }}`)
           kind: Rule
           middlewares:
-            - name: cloudfront-origin-guard
+            - name: traefik-cloudfront-origin-guard
           services:
             - name: '{{ include "app.name" . }}'
               namespace: '{{ include "app.namespace" . }}'

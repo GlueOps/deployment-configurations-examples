@@ -5,13 +5,13 @@ deployment:
 service:
   enabled: true
 
-# Requires the traefik-cloudfront-verifier app, which defines the cloudfront-origin-guard Middleware.
+# Requires the traefik-cloudfront-verifier app, which defines the traefik-cloudfront-origin-guard Middleware.
 # Annotations are not tpl-rendered: replace "nonprod" with your namespace.
 ingress:
   enabled: true
   ingressClassName: public-traefik
   annotations:
-    traefik.ingress.kubernetes.io/router.middlewares: nonprod-cloudfront-origin-guard@kubernetescrd
+    traefik.ingress.kubernetes.io/router.middlewares: nonprod-traefik-cloudfront-origin-guard@kubernetescrd
   entries:
     - name: public
       hosts:
