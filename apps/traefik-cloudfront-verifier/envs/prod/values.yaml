@@ -9,7 +9,7 @@ deployment:
     preStop:
       sleep:
         seconds: 10
-  # Prefer different zones and nodes, but still schedule both pods on a single node.
+  # Prefer different zones and nodes, but never block scheduling (a single-node cluster runs both pods).
   topologySpreadConstraints:
     - topologyKey: topology.kubernetes.io/zone
       maxSkew: 1
@@ -28,6 +28,7 @@ deployment:
             labelSelector:
               matchLabels:
                 app.kubernetes.io/instance: '{{ include "app.name" . }}'
+            matchLabelKeys: [pod-template-hash]
   securityContext:
     runAsNonRoot: true
     runAsUser: 101
