@@ -1,0 +1,167 @@
+deployment:
+  enabled: true
+  replicas: 2
+  # nginx stops accepting connections as soon as it's told to stop; keep serving until the pod is out of every endpoint list.
+  lifecycle:
+    preStop:
+      sleep:
+        seconds: 10
+  # Prefer different zones and nodes, but never block scheduling (a single-node cluster runs both pods).
+  topologySpreadConstraints:
+    - topologyKey: topology.kubernetes.io/zone
+      maxSkew: 1
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/instance: '{{ include "app.name" . }}'
+      matchLabelKeys: [pod-template-hash]
+  # Node preference as anti-affinity: a soft hostname spread rule is ignored when nodes have no zone label.
+  affinity:
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            topologyKey: kubernetes.io/hostname
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/instance: '{{ include "app.name" . }}'
+            matchLabelKeys: [pod-template-hash]
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 101
+    seccompProfile:
+      type: RuntimeDefault
+  containerSecurityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    capabilities:
+      drop: ["ALL"]
+  resources:
+    requests:
+      cpu: 10m
+      memory: 16Mi
+    limits:
+      memory: 1Gi
+  readinessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: http
+  volumes:
+    - name: nginx
+      configMap:
+        name: '{{ include "app.name" . }}-nginx'
+        # Required: the entrypoint skips non-executable scripts, and nginx would then start with no config.
+        defaultMode: 0755
+    - name: confd
+      emptyDir: {}
+    - name: tmp
+      emptyDir: {}
+  volumeMounts:
+    - name: nginx
+      mountPath: /docker-entrypoint.d/05-origin-verify.sh
+      subPath: 05-origin-verify.sh
+    - name: nginx
+      mountPath: /etc/nginx/nginx.conf
+      subPath: nginx.conf
+    - name: confd
+      mountPath: /etc/nginx/conf.d
+    - name: tmp
+      mountPath: /tmp
+
+service:
+  enabled: true
+
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1
+
+# Store ORIGIN_VERIFY_SECRETS at this path first: a JSON array of letters-and-digits strings, e.g. ["<value>"].
+# Change "prod" to your envs/ folder name. Values are read at startup, so restart the Deployment after changing them.
+externalSecret:
+  enabled: true
+  secrets:
+    origin-verify:
+      dataFrom:
+        key: secret/traefik-cloudfront-verifier/prod
+
+configMap:
+  enabled: true
+  configs:
+    nginx:
+      data: |-
+        # The image's default "worker_processes auto" starts one worker per node CPU, whatever the pod's limits.
+        nginx.conf: |
+          worker_processes 4;
+          error_log /var/log/nginx/error.log notice;
+          pid /tmp/nginx.pid;
+          events { worker_connections 1024; }
+          http {
+            client_body_temp_path /tmp/client_temp;
+            proxy_temp_path /tmp/proxy_temp;
+            fastcgi_temp_path /tmp/fastcgi_temp;
+            uwsgi_temp_path /tmp/uwsgi_temp;
+            scgi_temp_path /tmp/scgi_temp;
+            keepalive_timeout 65;
+            include /etc/nginx/conf.d/*.conf;
+          }
+        05-origin-verify.sh: |
+          #!/bin/sh
+          set -eu
+          # Line breaks are dropped so a pretty-printed array still matches as one line.
+          [ -n "${ORIGIN_VERIFY_SECRETS:-}" ] || { echo 'ORIGIN_VERIFY_SECRETS is not set: check the key name in your secret store' >&2; exit 1; }
+          list=$(printf %s "$ORIGIN_VERIFY_SECRETS" | tr -d '\r\n')
+          printf %s "$list" | grep -Eqx '[[:space:]]*\[[[:space:]]*"[A-Za-z0-9]+"[[:space:]]*(,[[:space:]]*"[A-Za-z0-9]+"[[:space:]]*)*\][[:space:]]*' || {
+            echo 'ORIGIN_VERIFY_SECRETS must be a JSON array of letters-and-digits strings, e.g. ["abc123"]' >&2
+            exit 1
+          }
+          rules=$(printf '%s\n' "$list" | grep -Eo '"[A-Za-z0-9]+"' | while read -r v; do
+            echo "    if (\$http_x_origin_verify = $v) { return 200; }"
+          done)
+          cat > /etc/nginx/conf.d/default.conf <<EOF
+          server {
+            listen 8080;
+            server_tokens off;
+            access_log off;
+            default_type text/plain;
+            location = /healthz { return 200 "ok\\n"; }
+            location / {
+          $rules
+              return 403 "Forbidden\\n";
+            }
+          }
+          EOF
+
+customResources:
+  - |
+    apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: traefik-cloudfront-origin-verify
+    spec:
+      forwardAuth:
+        address: 'http://{{ include "app.name" . }}.{{ include "app.namespace" . }}.svc.cluster.local:8080/'
+        authRequestHeaders:
+          - X-Origin-Verify
+  - |
+    apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: traefik-cloudfront-strip-header
+    spec:
+      headers:
+        customRequestHeaders:
+          X-Origin-Verify: ""
+  - |
+    apiVersion: traefik.io/v1alpha1
+    kind: Middleware
+    metadata:
+      name: traefik-cloudfront-origin-guard
+    spec:
+      chain:
+        middlewares:
+          - name: traefik-cloudfront-origin-verify
+          - name: traefik-cloudfront-strip-header
